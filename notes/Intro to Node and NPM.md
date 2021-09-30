@@ -13,7 +13,8 @@ You can finally use JS on the server side of development
 - Node is singlethreaded and based on an event driven non-blocking IO model
 - Its perfect for building fast and scalable data intensive apps
 - JS across the entire stack means faster and more efficient development
-- NPM is an enormous library of open-source packages available to everyone for free
+- NPM is an enormous library of open-source packages available to everyone for
+  free
 - The developer community is very active
 
 ### Node uses
@@ -29,7 +30,8 @@ You can finally use JS on the server side of development
 
 # Using modules
 
-To run javascript with node simply call node with the path to the file you wish to run
+To run javascript with node simply call node with the path to the file you wish
+to run
 
 The node docs are available at the nodejs website
 
@@ -47,17 +49,24 @@ const textOut = `This is what we know about the avocado: ${textIn}
 fs.writeFileSync('./txt/output.txt', textOut);
 ```
 
-The code to read and write the text was synchronous. Synchronous code can become problematic if you have slow operations however, because it blocks execution of other code (hence, 'blocking')
+The code to read and write the text was synchronous. Synchronous code can become
+problematic if you have slow operations however, because it blocks execution of
+other code (hence, 'blocking')
 
 The solution is to use async, non-blocking code
 
-Node processes only run on a single thread, so when one user potentially blocks access to all users everyone has to wait for that one guy to finish doing what he's doing
+Node processes only run on a single thread, so when one user potentially blocks
+access to all users everyone has to wait for that one guy to finish doing what
+he's doing
 
-So you should always try to use async code, which runs tasks in the background (more on this later)
+So you should always try to use async code, which runs tasks in the background
+(more on this later)
 
-Node is actually completely designed around callbacks, its a very different paradigm from things like php
+Node is actually completely designed around callbacks, its a very different
+paradigm from things like php
 
-Ultimately the callback paradigm is more performant at scale. Callbacks dont necessarily make them async though.
+Ultimately the callback paradigm is more performant at scale. Callbacks dont
+necessarily make them async though.
 
 Must be careful of avoiding callback hell however
 
@@ -101,6 +110,8 @@ fs.readFile('./txt/start.txt', 'utf-8', (error, data1) => {
 
 // writing data async
 fs.readFile('./txt/start.txt', 'utf-8', (error, data1) => {
+  if (error) return console.log(`ERROR 🤖`);
+
   fs.readFile(`./txt/${data1}.txt`, 'utf-8', (error, data2) => {
     console.log(data2);
     fs.readFile('./txt/append.txt', 'utf-8', (err, data3) => {
@@ -111,5 +122,29 @@ fs.readFile('./txt/start.txt', 'utf-8', (error, data1) => {
       });
     });
   });
+});
+```
+
+Important to remember that callback functions do not get their own lexical this
+
+# Creating a simple web server
+
+In order to build a server we have to do two things
+
+- Build it
+- Start it
+
+A super simple http server
+
+```javascript
+const fs = require('fs');
+const http = require('http');
+
+const server = http.createServer((request, response) => {
+  response.end('Hello from the other side 🤖');
+});
+
+server.listen(8000, '127.0.0.1', () => {
+  console.log(`Listening to requests on port 8000`);
 });
 ```
