@@ -2,6 +2,11 @@ const fs = require('fs');
 const http = require('http');
 const url = require('url');
 
+// The synchronous code blocks execution, which in this case is the POINT
+// It also executes only once
+const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8');
+const dataObject = JSON.parse(data);
+
 const server = http.createServer((request, response) => {
   const pathName = request.url;
 
@@ -9,6 +14,11 @@ const server = http.createServer((request, response) => {
     response.end(`This is the overview`);
   } else if (pathName === '/product') {
     response.end(`This is the product`);
+  } else if (pathName === '/api') {
+    response.writeHead(200, {
+      'Content-type': 'application/json',
+    });
+    response.end(data);
   } else {
     response.writeHead(404, {
       'Content-type': 'text/html',
