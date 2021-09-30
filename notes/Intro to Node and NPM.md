@@ -148,3 +148,45 @@ server.listen(8000, '127.0.0.1', () => {
   console.log(`Listening to requests on port 8000`);
 });
 ```
+
+# Routing in a web server
+
+Routing can get kind of messy so we can use Express or React-Router in the real
+world
+
+This will be routing done from scratch however
+
+The url module isnt strictly necessary in a project this simple but will come
+in handy in larger projects, reading params and values in particular
+
+## HTTP Headers
+
+Headers are a piece of response that we send back
+
+Headers can be predefined or your own, but must always be sent before the response content
+
+```javascript
+const fs = require('fs');
+const http = require('http');
+const url = require('url');
+
+const server = http.createServer((request, response) => {
+  const pathName = request.url;
+
+  if (pathName === '/overview' || pathName === '/') {
+    response.end(`This is the overview`);
+  } else if (pathName === '/product') {
+    response.end(`This is the product`);
+  } else {
+    response.writeHead(404, {
+      'Content-type': 'text/html',
+      'my-own-header': 'helloworld',
+    });
+    response.end(`<h1>This page could not be found 🤖</h1>`);
+  }
+});
+
+server.listen(8000, '127.0.0.1', () => {
+  console.log(`Listening to requests on port 8000`);
+});
+```
