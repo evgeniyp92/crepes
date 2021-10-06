@@ -274,3 +274,22 @@ server.listen(8000, '127.0.0.1', () => {
   console.log(`Listening to requests on port 8000`);
 });
 ```
+
+# Building HTML templates
+
+We can replace boilerplate with placeholders in order to update programmatically
+
+```html
+<h2 class="product__name">{%PRODUCTNAME%}</h2>
+<div class="product__details">
+  <p><span class="emoji-left">🌍</span>From {%FROM%}</p>
+  <p><span class="emoji-left">❤️</span>{%NUTRIENTS%}</p>
+  <p><span class="emoji-left">📦</span>{%QUANTITY%}</p>
+  <p><span class="emoji-left">🏷</span>{%PRICE%}€</p>
+</div>
+
+<a href="#" class="product__link">
+  <span class="emoji-left">🛒</span>
+  <span>Add to shopping card ({%PRICE%}€)</span>
+</a>
+```
