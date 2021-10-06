@@ -351,3 +351,26 @@ const replaceTemplate = (template, product) => {
   return output;
 };
 ```
+
+# Parsing variables from URL
+
+In order to be able to parse url params we need to load the url module
+
+Parsing the url
+
+```javascript
+const server = http.createServer((request, response) => {
+  console.log(request.url);
+  console.log(url.parse(request.url, true));
+  // you need to pass true as the second arg to parse the query into an object
+  const pathName = request.url;
+  // ... etc etc etc
+```
+
+```javascript
+const { query, pathname } = url.parse(request.url, true);
+```
+
+```javascript
+
+```
