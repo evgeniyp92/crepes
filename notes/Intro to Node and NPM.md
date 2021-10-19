@@ -393,3 +393,118 @@ export default (template, product) => {
   return output;
 };
 ```
+
+# NPM and the package.json file
+
+Node package manager is a CLI app that automatically comes with node that we
+use to open and install packages from npm
+
+It's actually the largest software registry in the world, fast approaching 1M
+packages
+
+In order to actually use it we need to initialize our project with `npm init`
+
+This is what our package.json looks like to start
+
+```json
+{
+  "name": "node-farm",
+  "version": "1.0.0",
+  "description": "Learning node.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Evgeniy Pimenov",
+  "license": "ISC"
+}
+```
+
+# Installing packages with NPM
+
+We can install simple dependencies or development dependencies
+
+Simple dependencies are code that we build upon to actually make our application
+chooch
+
+We used to have to specify `save` but you dont have to anymore
+
+Dev dependencies are things you use in development but do not require in prod
+
+To install something as a dev dep you need to write `--save-dev`
+
+Nodemon reloads our environment whenever a change is detected
+
+## Two types of installation
+
+You can install packages locally or globally
+
+Packages are installed locally by default and globally with `-g`
+
+## Configuring nodemon to run with our project
+
+Now instead of writing `node` we write `nodemon`
+
+Nodemon fires a reload on every save of the document
+
+It is effectively a wrapper around the node command to quickly cycle node in the
+event of changes
+
+If you dont install nodemon globally it wouldnt run from the cli
+
+So you have to specify an npm script
+
+```json
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+```
+
+In the above case nodemon will be coming from the `node_modules` folder.
+
+To run the script this way we give `npm run start`.
+
+Generally, global deps are dev tools because it doesnt make sense to install
+them in every project
+
+## Including third party modules in code
+
+To add third party modules we simply use the require pattern
+
+# Package versioning and updating
+
+All packages follow `major, minor, patch` versioning
+
+- Patches are for bugfixing
+- Minor is for adding features but not breaking changes (so backward compatible)
+- Major is for breaking changes (no guarantee of being backward compatible)
+
+In node we can specify what updates to accept
+
+```json
+    "nodemon": "^2.0.13"
+```
+
+This specifies that we accept patches and minor updates but not major updates
+
+You can go back and install old versions of packages if you choose i.e. `npm i slugify@1.0.0`
+
+You can check if you have outdated packages by running `npm outdated`
+
+`~` will only accept patch releases
+
+`*` will accept all versions, even with breaking changes
+
+delete packages with `npm uninstall`
+
+the `node_modules` folder can get really oversized so make sure you dont push it up to github
+
+since you have a `package.json` file you can just npm install from the machine you pull it down from
+
+## The package-lock.json file
+
+The package lock file tracks your dependencies as well as the dependencies of your depenedencies
+
+This is important to ensure that code performs as expected across platforms
+
+It along with your `package.json` is the blueprint for your application

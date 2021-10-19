@@ -1,4 +1,4 @@
-export default (template, product) => {
+module.exports = (template, product) => {
   let output = template.replace(/{%PRODUCTNAME%}/g, product.productName);
   output = output.replace(/{%IMAGE%}/g, product.image);
   output = output.replace(/{%PRICE%}/g, product.price);

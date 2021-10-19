@@ -2,6 +2,8 @@ const fs = require('fs');
 const http = require('http');
 const url = require('url');
 
+const slugify = require('slugify');
+
 const replaceTemplate = require('./modules/replaceTemplate');
 
 // The synchronous code blocks execution, which in this case is the POINT
@@ -23,6 +25,15 @@ const tempProduct = fs.readFileSync(
 const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8');
 const dataObject = JSON.parse(data);
 
+const slugs = dataObject.map(element =>
+  // @ts-ignore
+  slugify(element.productName, {
+    lower: true,
+  })
+);
+
+console.log(slugs);
+
 const server = http.createServer((request, response) => {
   const { query, pathname } = url.parse(request.url, true);
 
@@ -43,6 +54,7 @@ const server = http.createServer((request, response) => {
 
     // Product page
   } else if (pathname === '/product') {
+    // @ts-ignore
     const product = dataObject[query.id];
     const output = replaceTemplate(tempProduct, product);
 
