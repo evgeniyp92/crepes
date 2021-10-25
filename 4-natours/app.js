@@ -8,29 +8,14 @@ app.use(express.json());
 // Setting the port
 const PORT = 4000;
 
-// defining a route
-// note that express requests are a bit more detailed than the node http lib
-// app.get('/', (request, response) => {
-//   response.status(200).json({
-//     message: `Hello from the server side!`,
-//     app: 'Natours',
-//   });
-// });
-
-// app.post('/', (request, response) => {
-//   response.send(`You can post to this endpoint 😳`);
-// });
-
 // loading files
 const tours = JSON.parse(
   // @ts-ignore
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
 
-// defining routes
-
-// simple get route
-app.get('/api/v1/tours', (request, response) => {
+// declaring our functions
+const getAllTours = (request, response) => {
   response.json({
     status: 'success',
     results: tours.length,
@@ -38,11 +23,8 @@ app.get('/api/v1/tours', (request, response) => {
       tours,
     },
   });
-});
-
-// get route to fetch only one item
-// use a colon to denote a param, a ? makes it optional (:id?)
-app.get('/api/v1/tours/:id', (request, response) => {
+};
+const getTour = (request, response) => {
   const { params } = request;
   const tour = tours.find(element => element.id === Number(params.id));
   // controlling for insane request
@@ -68,10 +50,8 @@ app.get('/api/v1/tours/:id', (request, response) => {
       tour,
     },
   });
-});
-
-// post route
-app.post('/api/v1/tours', (request, response) => {
+};
+const createTour = (request, response) => {
   // first thing is to figure out the id of the object, since the db wont do it for us here
   // figuring out the id based on the length of the tours array
   const newId = tours[tours.length - 1].id + 1;
@@ -94,10 +74,8 @@ app.post('/api/v1/tours', (request, response) => {
       });
     }
   );
-});
-
-// patch route
-app.patch('/api/v1/tours/:id', ({ params, body }, response) => {
+};
+const updateTour = ({ params, body }, response) => {
   // checking that the things we need exist
   if (!params || !body) {
     return response.status(404).json({
@@ -121,10 +99,8 @@ app.patch('/api/v1/tours/:id', ({ params, body }, response) => {
       tour: 'updated tour here bro',
     },
   });
-});
-
-// delete route
-app.delete('/api/v1/tours/:id', ({ params, body }, response) => {
+};
+const deleteTour = ({ params }, response) => {
   // checking that the things we need exist
   if (!params.id) {
     return response.status(404).json({
@@ -145,7 +121,24 @@ app.delete('/api/v1/tours/:id', ({ params, body }, response) => {
     params,
     data: null,
   });
-});
+};
+
+// declaring endpoints
+// use a colon to denote a param, a ? makes it optional (:id?)
+// app.get('/api/v1/tours', getAllTours);
+// app.get('/api/v1/tours/:id', getTour);
+// app.post('/api/v1/tours', createTour);
+// app.patch('/api/v1/tours/:id', updateTour);
+// app.delete('/api/v1/tours/:id', deleteTour);
+
+// faster way of declaring routes than above
+// declare the endpoint and then chain all applicable methods
+app.route('/api/v1/tours').get(getAllTours).post(createTour);
+app
+  .route('/api/v1/tours/:id')
+  .get(getTour)
+  .patch(updateTour)
+  .delete(deleteTour);
 
 // Setting up a listen
 app.listen(PORT, () => {
