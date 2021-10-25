@@ -98,18 +98,21 @@ app.post('/api/v1/tours', (request, response) => {
 
 // patch route
 app.patch('/api/v1/tours/:id', ({ params, body }, response) => {
+  // checking that the things we need exist
   if (!params || !body) {
-    return response.json({
+    return response.status(404).json({
       status: 'fail',
       reason: 'please provide params and a body!',
     });
   }
+  // checking that the id is in range
   if (Number(params.id) > tours.length) {
-    return response.json({
+    return response.status(404).json({
       status: 'fail',
       reason: 'please provide a valid id!',
     });
   }
+  // responding to the request
   response.json({
     status: 'success',
     params,
@@ -117,6 +120,30 @@ app.patch('/api/v1/tours/:id', ({ params, body }, response) => {
     data: {
       tour: 'updated tour here bro',
     },
+  });
+});
+
+// delete route
+app.delete('/api/v1/tours/:id', ({ params, body }, response) => {
+  // checking that the things we need exist
+  if (!params.id) {
+    return response.status(404).json({
+      status: 'fail',
+      reason: 'please provide an id!',
+    });
+  }
+  // checking that the id is in range
+  if (Number(params.id) > tours.length) {
+    return response.status(404).json({
+      status: 'fail',
+      reason: 'please provide a valid id!',
+    });
+  }
+  // responding to the request
+  response.status(204).json({
+    status: 'success',
+    params,
+    data: null,
   });
 });
 
