@@ -96,6 +96,30 @@ app.post('/api/v1/tours', (request, response) => {
   );
 });
 
+// patch route
+app.patch('/api/v1/tours/:id', ({ params, body }, response) => {
+  if (!params || !body) {
+    return response.json({
+      status: 'fail',
+      reason: 'please provide params and a body!',
+    });
+  }
+  if (Number(params.id) > tours.length) {
+    return response.json({
+      status: 'fail',
+      reason: 'please provide a valid id!',
+    });
+  }
+  response.json({
+    status: 'success',
+    params,
+    body,
+    data: {
+      tour: 'updated tour here bro',
+    },
+  });
+});
+
 // Setting up a listen
 app.listen(PORT, () => {
   console.log(`App running on port ${PORT}...`);
