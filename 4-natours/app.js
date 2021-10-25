@@ -28,6 +28,8 @@ const tours = JSON.parse(
 );
 
 // defining routes
+
+// simple get route
 app.get('/api/v1/tours', (request, response) => {
   response.json({
     status: 'success',
@@ -38,6 +40,37 @@ app.get('/api/v1/tours', (request, response) => {
   });
 });
 
+// get route to fetch only one item
+// use a colon to denote a param, a ? makes it optional (:id?)
+app.get('/api/v1/tours/:id', (request, response) => {
+  const { params } = request;
+  const tour = tours.find(element => element.id === Number(params.id));
+  // controlling for insane request
+  // general catch for if an id doesnt come back
+  if (!tour) {
+    return response.status(404).json({
+      status: 'fail',
+      reason: 'Invalid ID',
+    });
+  }
+  // deterministically checking for an out of range id
+  if (Number(params.id) > tours.length) {
+    return response.status(404).json({
+      status: 'fail',
+      reason: 'id is not valid, probably too high!',
+    });
+  }
+  // actually processing and responding if the checks pass
+  response.json({
+    status: 'success',
+    params,
+    data: {
+      tour,
+    },
+  });
+});
+
+// post route
 app.post('/api/v1/tours', (request, response) => {
   // first thing is to figure out the id of the object, since the db wont do it for us here
   // figuring out the id based on the length of the tours array
