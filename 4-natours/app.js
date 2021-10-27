@@ -5,6 +5,22 @@ const fs = require('fs');
 const app = express();
 // adding middleware to allow receiving body
 app.use(express.json());
+// adding an additional function to the middleware stack
+app.use((req, res, next) => {
+  // we get access to the request, response, and the next function
+  console.log('Hello from our custom middleware 💩');
+  // without calling the next function the flow would hang
+  next();
+});
+
+// manipulating the request object
+app.use((req, res, next) => {
+  // appending the time of the request to the request
+  // @ts-ignore
+  req.currentTime = new Date().toISOString();
+  next();
+});
+
 // Setting the port
 const PORT = 4000;
 
@@ -16,8 +32,10 @@ const tours = JSON.parse(
 
 // declaring our functions
 const getAllTours = (request, response) => {
+  console.log(request.currentTime);
   response.json({
     status: 'success',
+    requestedAt: request.currentTime,
     results: tours.length,
     data: {
       tours,
