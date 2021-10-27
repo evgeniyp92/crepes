@@ -144,6 +144,41 @@ const deleteTour = ({ params }, response) => {
   });
 };
 
+const getAllUsers = (request, response) => {
+  response.status(500).json({
+    status: 'error',
+    reason: 'endpoint not yet implemented',
+  });
+};
+
+const createUser = (request, response) => {
+  response.status(500).json({
+    status: 'error',
+    reason: 'endpoint not yet implemented',
+  });
+};
+
+const getUser = (request, response) => {
+  response.status(500).json({
+    status: 'error',
+    reason: 'endpoint not yet implemented',
+  });
+};
+
+const updateUser = (request, response) => {
+  response.status(500).json({
+    status: 'error',
+    reason: 'endpoint not yet implemented',
+  });
+};
+
+const deleteUser = (request, response) => {
+  response.status(500).json({
+    status: 'error',
+    reason: 'endpoint not yet implemented',
+  });
+};
+
 // ROUTES
 
 // declaring endpoints
@@ -157,11 +192,20 @@ const deleteTour = ({ params }, response) => {
 // faster way of declaring routes than above
 // declare the endpoint and then chain all applicable methods
 app.route('/api/v1/tours').get(getAllTours).post(createTour);
+
 app
   .route('/api/v1/tours/:id')
   .get(getTour)
   .patch(updateTour)
   .delete(deleteTour);
+
+app.route('/api/v1/users').get(getAllUsers).post(createUser);
+
+app
+  .route('/api/v1/users/:id')
+  .get(getUser)
+  .patch(updateUser)
+  .delete(deleteUser);
 
 // SERVER
 app.listen(PORT, () => {
