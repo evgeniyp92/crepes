@@ -1,10 +1,13 @@
 const express = require('express');
 const fs = require('fs');
+const morgan = require('morgan');
 
 // Initializing application
 const app = express();
-// adding middleware to allow receiving body
+
+// MIDDLEWARES
 app.use(express.json());
+app.use(morgan('dev'));
 // adding an additional function to the middleware stack
 app.use((req, res, next) => {
   // we get access to the request, response, and the next function
@@ -30,7 +33,7 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
 
-// declaring our functions
+// ROUTE HANDLERS
 const getAllTours = (request, response) => {
   console.log(request.currentTime);
   response.json({
@@ -141,6 +144,8 @@ const deleteTour = ({ params }, response) => {
   });
 };
 
+// ROUTES
+
 // declaring endpoints
 // use a colon to denote a param, a ? makes it optional (:id?)
 // app.get('/api/v1/tours', getAllTours);
@@ -158,7 +163,7 @@ app
   .patch(updateTour)
   .delete(deleteTour);
 
-// Setting up a listen
+// SERVER
 app.listen(PORT, () => {
   console.log(`App running on port ${PORT}...`);
 });
