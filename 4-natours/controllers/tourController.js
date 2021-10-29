@@ -6,6 +6,28 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 );
 
+exports.checkId = (request, response, next, paramValue) => {
+  console.log(`Tour id is ${paramValue}`);
+  if (request.params.id * 1 > tours.length) {
+    return response.status(404).json({
+      status: 'Fail',
+      reason: 'Invalid ID',
+    });
+  }
+  next();
+};
+
+exports.checkBody = (request, response, next) => {
+  if (!request.body.name || !request.body.price) {
+    return response.status(400).json({
+      status: 'Fail',
+      reason: 'Didnt provide a required parameter',
+      requiredParameters: ['name', 'price'],
+    });
+  }
+  next();
+};
+
 exports.getAllTours = (request, response) => {
   console.log(request.currentTime);
   response.json({
@@ -17,33 +39,18 @@ exports.getAllTours = (request, response) => {
     },
   });
 };
+
 exports.getTour = (request, response) => {
-  const { params } = request;
-  const tour = tours.find(element => element.id === Number(params.id));
-  // controlling for insane request
-  // general catch for if an id doesnt come back
-  if (!tour) {
-    return response.status(404).json({
-      status: 'fail',
-      reason: 'Invalid ID',
-    });
-  }
-  // deterministically checking for an out of range id
-  if (Number(params.id) > tours.length) {
-    return response.status(404).json({
-      status: 'fail',
-      reason: 'id is not valid, probably too high!',
-    });
-  }
-  // actually processing and responding if the checks pass
+  const tour = tours.find(element => element.id === Number(request.params.id));
   response.json({
     status: 'success',
-    params,
+    params: request.params,
     data: {
       tour,
     },
   });
 };
+
 exports.createTour = (request, response) => {
   // first thing is to figure out the id of the object, since the db wont do it for us here
   // figuring out the id based on the length of the tours array
@@ -68,22 +75,8 @@ exports.createTour = (request, response) => {
     }
   );
 };
+
 exports.updateTour = ({ params, body }, response) => {
-  // checking that the things we need exist
-  if (!params || !body) {
-    return response.status(404).json({
-      status: 'fail',
-      reason: 'please provide params and a body!',
-    });
-  }
-  // checking that the id is in range
-  if (Number(params.id) > tours.length) {
-    return response.status(404).json({
-      status: 'fail',
-      reason: 'please provide a valid id!',
-    });
-  }
-  // responding to the request
   response.json({
     status: 'success',
     params,
@@ -93,22 +86,8 @@ exports.updateTour = ({ params, body }, response) => {
     },
   });
 };
+
 exports.deleteTour = ({ params }, response) => {
-  // checking that the things we need exist
-  if (!params.id) {
-    return response.status(404).json({
-      status: 'fail',
-      reason: 'please provide an id!',
-    });
-  }
-  // checking that the id is in range
-  if (Number(params.id) > tours.length) {
-    return response.status(404).json({
-      status: 'fail',
-      reason: 'please provide a valid id!',
-    });
-  }
-  // responding to the request
   response.status(204).json({
     status: 'success',
     params,
