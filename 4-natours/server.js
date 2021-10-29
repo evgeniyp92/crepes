@@ -14,6 +14,7 @@ mongoose
     useNewUrlParser: true,
     useCreateIndex: true,
     useFindAndModify: false,
+    useUnifiedTopology: true,
   })
   .then((connection) => {
     console.log(`MongoDB Connected!`);
@@ -36,6 +37,20 @@ const tourSchema = new mongoose.Schema({
 });
 
 const Tour = mongoose.model('Tour', tourSchema);
+
+const testTour = new Tour({
+  name: 'The Park Camper',
+  price: 297,
+});
+
+testTour
+  .save()
+  .then((document) => {
+    console.log(document);
+  })
+  .catch((error) => {
+    console.log(`ERROR 🤖💥: ${error}`);
+  });
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
