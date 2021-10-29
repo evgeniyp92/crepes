@@ -16,9 +16,26 @@ mongoose
     useFindAndModify: false,
   })
   .then((connection) => {
-    console.log(connection.connections);
     console.log(`MongoDB Connected!`);
   });
+
+const tourSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'No name specified'],
+    unique: true,
+  },
+  rating: {
+    type: Number,
+    default: 4.5,
+  },
+  price: {
+    type: Number,
+    required: [true, 'No price specified'],
+  },
+});
+
+const Tour = mongoose.model('Tour', tourSchema);
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
