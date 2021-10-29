@@ -9,14 +9,19 @@ const userRouter = require('./routes/userRoutes');
 const app = express();
 
 // MIDDLEWARES -- DECLARE ALL YOUR MIDDLEWARE HERE FOR GLOBAL MIDDLEWARE
-app.use(express.json());
+// logging via morgan
 app.use(morgan('dev'));
+// bodyparser
+app.use(express.json());
+// serving static pages
+app.use(express.static(`${__dirname}/public`));
+// hello world
 app.use((req, res, next) => {
   console.log('Hello from our custom middleware 💩');
   next();
 });
+// append time to the request object
 app.use((req, res, next) => {
-  // appending the time of the request to the request
   // @ts-ignore
   req.currentTime = new Date().toISOString();
   next();
