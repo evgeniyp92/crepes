@@ -10,7 +10,7 @@ const app = express();
 
 // MIDDLEWARES -- DECLARE ALL YOUR MIDDLEWARE HERE FOR GLOBAL MIDDLEWARE
 // logging via morgan
-app.use(morgan('dev'));
+if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 // bodyparser
 app.use(express.json());
 // serving static pages
