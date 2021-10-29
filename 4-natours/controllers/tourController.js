@@ -41,7 +41,9 @@ exports.getAllTours = (request, response) => {
 };
 
 exports.getTour = (request, response) => {
-  const tour = tours.find(element => element.id === Number(request.params.id));
+  const tour = tours.find(
+    (element) => element.id === Number(request.params.id)
+  );
   response.json({
     status: 'success',
     params: request.params,
@@ -65,7 +67,7 @@ exports.createTour = (request, response) => {
     // supplying a stringified version of the object as data
     JSON.stringify(tours),
     // once the write is complete, we send a response indicating it is done
-    error => {
+    () => {
       response.status(201).json({
         status: 'success',
         data: {

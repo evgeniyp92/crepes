@@ -1,10 +1,10 @@
 const dotenv = require('dotenv');
-dotenv.config({ path: './config.env' });
-
 const app = require('./app');
+
+dotenv.config({ path: './config.env' });
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
-  console.log(`Environment is ${process.env.NODE_ENV}`);
+  // eslint-disable-next-line no-console
   console.log(`App running on port ${port}...`);
 });
