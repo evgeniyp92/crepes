@@ -20,38 +20,6 @@ mongoose
     console.log(`MongoDB Connected!`);
   });
 
-const tourSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'No name specified'],
-    unique: true,
-  },
-  rating: {
-    type: Number,
-    default: 4.5,
-  },
-  price: {
-    type: Number,
-    required: [true, 'No price specified'],
-  },
-});
-
-const Tour = mongoose.model('Tour', tourSchema);
-
-const testTour = new Tour({
-  name: 'The Park Camper',
-  price: 297,
-});
-
-testTour
-  .save()
-  .then((document) => {
-    console.log(document);
-  })
-  .catch((error) => {
-    console.log(`ERROR 🤖💥: ${error}`);
-  });
-
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
   // eslint-disable-next-line no-console
