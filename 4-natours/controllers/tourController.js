@@ -15,12 +15,6 @@ exports.getAllTours = async (request, response) => {
     );
 
     let query = Tour.find(JSON.parse(queryString));
-    // using mongoose to execute the search
-    // const query = Tour.find()
-    //   .where('duration')
-    //   .equals(request.query.duration)
-    //   .where('difficulty')
-    //   .equals(request.query.difficulty);
 
     // 2. SORTING
     if (request.query.sort) {
@@ -40,8 +34,29 @@ exports.getAllTours = async (request, response) => {
       query.select('-__v');
     }
 
+    // 4. PAGINATION
+    // http://localhost:4000/api/v1/tours?page=2&limit=10
+    const page = request.query.page * 1 || 1;
+    const limit = request.query.limit * 1 || 100;
+    const skip = (page - 1) * limit;
+    // 1-10 page 1, 11-20 page 2, 21-30 page 3 etc etc
+    query = query.skip(skip).limit(limit);
+
+    if (request.query.page) {
+      const numTours = await Tour.countDocuments();
+      if (skip >= numTours) throw new Error('This page does not exist.');
+    }
+
     // EXECUTE QUERY
     const allTours = await query;
+    // query.sort().select().skip().limit()
+
+    // using mongoose to execute the search
+    // const query = Tour.find()
+    //   .where('duration')
+    //   .equals(request.query.duration)
+    //   .where('difficulty')
+    //   .equals(request.query.difficulty);
 
     // SEND RESPONSE
     response.json({
