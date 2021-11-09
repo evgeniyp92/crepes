@@ -2,21 +2,33 @@ const Tour = require('../models/tourModel');
 
 exports.getAllTours = async (request, response) => {
   try {
-    // BUILD QUERY
+    // 1A. BUILD QUERY
     const queryObj = { ...request.query };
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
     excludedFields.forEach((element) => delete queryObj[element]);
 
-    console.log(request.query, queryObj);
+    // 1B. ADVANCED FILTERING
+    let queryString = JSON.stringify(queryObj);
+    queryString = queryString.replace(
+      /\b(gte|gt|lte|lt)\b/g,
+      (matchedTerm) => `$${matchedTerm}`
+    );
 
-    const query = Tour.find(queryObj);
-
+    let query = Tour.find(JSON.parse(queryString));
     // using mongoose to execute the search
     // const query = Tour.find()
     //   .where('duration')
     //   .equals(request.query.duration)
     //   .where('difficulty')
     //   .equals(request.query.difficulty);
+
+    // 2. SORTING
+    if (request.query.sort) {
+      const sortBy = request.query.sort.split(',').join(' ');
+      query = query.sort(sortBy);
+    } else {
+      query = query.sort('-createdAt');
+    }
 
     // EXECUTE QUERY
     const allTours = await query;
