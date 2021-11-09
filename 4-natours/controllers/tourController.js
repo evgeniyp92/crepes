@@ -125,3 +125,97 @@ exports.deleteTour = async (request, response) => {
     });
   }
 };
+
+exports.getTourStats = async (request, response) => {
+  try {
+    const stats = await Tour.aggregate([
+      {
+        $match: { ratingsAverage: { $gte: 4.5 } },
+      },
+      {
+        $group: {
+          _id: { $toUpper: '$difficulty' },
+          numTours: { $sum: 1 },
+          numRatings: { $sum: '$ratingsQuantity' },
+          avgRating: { $avg: '$ratingsAverage' },
+          avgPrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' },
+        },
+      },
+      {
+        $sort: {
+          avgPrice: 1,
+        },
+      },
+    ]);
+    response.json({
+      status: 'success',
+      data: stats,
+    });
+  } catch (error) {
+    response.status(404).json({
+      status: 'fail',
+      message: error,
+    });
+  }
+};
+
+exports.getMonthlyPlan = async (request, response) => {
+  try {
+    const year = request.params.year * 1; // 2021
+    const plan = await Tour.aggregate([
+      {
+        // unwinding startDates into own documents
+        $unwind: '$startDates',
+      },
+      {
+        $match: {
+          // filtering for tours that only start in the param year
+          startDates: {
+            $gte: new Date(`${year}-01-01`),
+            $lte: new Date(`${year}-12-31`),
+          },
+        },
+      },
+      {
+        $group: {
+          // grouping entries by month and selecting data to display
+          _id: { $month: '$startDates' },
+          numTourStarts: { $sum: 1 },
+          tours: { $push: '$name' },
+        },
+      },
+      {
+        // adding a human readable field for the month
+        $addFields: { month: '$_id' },
+      },
+      {
+        // sorting by amount of tour starts, descending
+        $sort: {
+          numTourStarts: -1,
+        },
+      },
+      {
+        // removing the id field from the return
+        $project: {
+          _id: 0,
+        },
+      },
+      {
+        // limiting the return to 12
+        $limit: 12,
+      },
+    ]);
+    response.json({
+      status: 'success',
+      results: plan.length,
+      data: { ...plan },
+    });
+  } catch (error) {
+    response.status(404).json({
+      status: 'fail',
+      message: error,
+    });
+  }
+};
