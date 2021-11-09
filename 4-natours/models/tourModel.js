@@ -1,3 +1,4 @@
+/* eslint-disable func-names, prefer-arrow-callback */
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 
@@ -61,8 +62,15 @@ const tourSchema = new mongoose.Schema(
       select: false,
     },
     startDates: [Date],
+    secretTour: {
+      type: Boolean,
+      default: false,
+    },
   },
-  { toJSON: { virtuals: true }, toObject: { virtuals: true } }
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
 
 tourSchema.virtual('durationWeeks').get(function () {
@@ -73,6 +81,26 @@ tourSchema.virtual('durationWeeks').get(function () {
 // runs before the save command and the create command (not on insertMany)
 tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
+  next();
+});
+
+// QUERY MIDDLEWARE
+tourSchema.pre(/^find/, function (next) {
+  this.find({ secretTour: { $ne: true } });
+  this.startTime = Date.now();
+  next();
+});
+
+tourSchema.post(/^find/, function (documents, next) {
+  console.log(`Operation took ${Date.now() - this.startTime} ms`);
+  next();
+});
+
+// AGGREGATOR MIDDLEWARE
+tourSchema.pre('aggregate', function (next) {
+  // adding additional aggregation from the model
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+  console.log(this.pipeline());
   next();
 });
 
