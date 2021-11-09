@@ -47,6 +47,14 @@ const tourSchema = new mongoose.Schema(
     },
     priceDiscount: {
       type: Number,
+      // note that this validate will only run on new documents, not updates
+      validate: {
+        validator(specifiedValue) {
+          return specifiedValue < this.price;
+        },
+        message:
+          'Discount price ({VALUE}) should not be greater number than regular price',
+      },
     },
     summary: {
       type: String,
@@ -86,7 +94,7 @@ tourSchema.virtual('durationWeeks').get(function () {
 });
 
 // DOCUMENT MIDDLEWARE
-// runs before the save command and the create command (not on insertMany)
+// runs before the save command and the create command (not on insertMany or update)
 tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
