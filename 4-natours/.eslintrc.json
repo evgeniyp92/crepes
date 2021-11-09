@@ -14,6 +14,7 @@
     "no-underscore-dangle": "off",
     "class-methods-use-this": "off",
     "prefer-object-spread": "warn",
+    "prefer-arrow-callback": "warn",
     "prefer-destructuring": ["warn", {"object": true, "array": false}],
     "no-unused-vars": ["error", {"argsIgnorePattern": "request|response|next|paramValue"}]
   }
