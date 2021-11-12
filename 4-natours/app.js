@@ -26,5 +26,13 @@ app.use((req, res, next) => {
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
+// Controlling for a route that isnt handled by any router listed above
+app.all('*', (request, response, next) => {
+  response.status(404).json({
+    status: 'fail',
+    message: `Route ${request.originalUrl} does not exist`,
+  });
+});
+
 // SERVER
 module.exports = app;
