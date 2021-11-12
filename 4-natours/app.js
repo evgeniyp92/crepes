@@ -15,11 +15,6 @@ if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 app.use(express.json());
 // serving static pages
 app.use(express.static(`${__dirname}/public`));
-// hello world
-app.use((req, res, next) => {
-  console.log('Hello from our custom middleware 💩');
-  next();
-});
 // append time to the request object
 app.use((req, res, next) => {
   // @ts-ignore
