@@ -1,5 +1,6 @@
 const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
+const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 
 exports.aliasTopTours = (request, response, next) => {
@@ -38,6 +39,11 @@ exports.getAllTours = catchAsync(async (request, response, next) => {
 
 exports.getTour = catchAsync(async (request, response, next) => {
   const tour = await Tour.findById(request.params.id);
+
+  if (!tour) {
+    return next(new AppError('Requested tour does not exist', 404));
+  }
+
   response.json({
     status: 'success',
     params: request.params,
@@ -55,6 +61,10 @@ exports.updateTour = catchAsync(async (request, response, next) => {
     runValidators: true,
   });
 
+  if (!tour) {
+    return next(new AppError('Requested tour does not exist', 404));
+  }
+
   response.json({
     status: 'success',
     params: request.params,
@@ -66,7 +76,12 @@ exports.updateTour = catchAsync(async (request, response, next) => {
 });
 
 exports.deleteTour = catchAsync(async (request, response, next) => {
-  await Tour.findByIdAndDelete(request.params.id);
+  const tour = await Tour.findByIdAndDelete(request.params.id);
+
+  if (!tour) {
+    return next(new AppError('Requested tour does not exist', 404));
+  }
+
   response.status(204).json({
     status: 'success',
     data: null,

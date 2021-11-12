@@ -17,11 +17,11 @@ mongoose
     useUnifiedTopology: true,
   })
   .then((connection) => {
-    // console.log(`MongoDB Connected!`);
+    console.log(`MongoDB Connected!`);
   });
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
   // eslint-disable-next-line no-console
-  // console.log(`App running on port ${port}...`);
+  console.log(`App running on port ${port}...`);
 });
