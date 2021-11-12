@@ -23,6 +23,7 @@ mongoose
     useFindAndModify: false,
     useUnifiedTopology: true,
   })
+  // eslint-disable-next-line no-unused-vars
   .then((connection) => {
     console.log(`MongoDB Connected!`);
   });
