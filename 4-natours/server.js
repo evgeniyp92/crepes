@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 
@@ -8,6 +9,12 @@ const DB = process.env.DB_CONN_STRING.replace(
   '<PASSWORD>',
   process.env.DB_ADM_PASSWORD
 );
+
+process.on('uncaughtException', (error) => {
+  console.error(`UNCAUGHT EXCEPTION, SHUTTING DOWN`);
+  console.log(error);
+  process.exit(1);
+});
 
 mongoose
   .connect(DB, {
@@ -30,7 +37,5 @@ const server = app.listen(port, () => {
 process.on('unhandledRejection', (error) => {
   console.warn(error.name, error.message);
   console.error(`UNHANDLED REJECTION, SHUTTING DOWN...`);
-  server.close(() => {
-    process.exit(1);
-  });
+  server.close(() => process.exit(1));
 });
