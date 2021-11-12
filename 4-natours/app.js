@@ -28,9 +28,30 @@ app.use('/api/v1/users', userRouter);
 
 // Controlling for a route that isnt handled by any router listed above
 app.all('*', (request, response, next) => {
-  response.status(404).json({
-    status: 'fail',
-    message: `Route ${request.originalUrl} does not exist`,
+  // response.status(404).json({
+  //   status: 'fail',
+  //   message: `Route ${request.originalUrl} does not exist`,
+  // });
+
+  const error = new Error(
+    `Requested route ${request.originalUrl} does not exist`
+  );
+  error.status = 'fail';
+  error.statusCode = 404;
+
+  // passing an error to next() will cause it to go to our error handler
+  next(error);
+});
+
+app.use((error, request, response, next) => {
+  // eslint-disable-next-line no-param-reassign
+  error.statusCode = error.statusCode || 500;
+  // eslint-disable-next-line no-param-reassign
+  error.status = error.status || 'Unknown error';
+
+  response.status(error.statusCode).json({
+    status: error.status,
+    message: error.message,
   });
 });
 
