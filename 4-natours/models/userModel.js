@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   // name, email, photo, password, passwordconfirm
@@ -25,7 +26,21 @@ const userSchema = new mongoose.Schema({
   passwordConfirm: {
     type: String,
     required: [true, 'Must confirm password'],
+    validate: {
+      validator(el) {
+        return el === this.password;
+      },
+      message: 'Passwords must match',
+    },
   },
+});
+
+// eslint-disable-next-line func-names
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+
+  this.password = await bcrypt.hash(this.password, 12);
+  this.passwordConfirm = undefined;
 });
 
 const User = mongoose.model('User', userSchema);
