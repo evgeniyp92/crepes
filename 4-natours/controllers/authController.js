@@ -35,7 +35,7 @@ exports.login = catchAsync(async (request, response, next) => {
     return next(new AppError('No e-mail or password specified', 400));
   }
 
-  // 2) Check if the user exists && password correct
+  // 2) Check if the user exists, and also pull in the password for later
   const user = await User.findOne({ email }).select('+password');
 
   // if there is no user or the evaluation of passwords fails, send an error
