@@ -1,4 +1,13 @@
 class AppError extends Error {
+  /**
+   * @abstract AppError builds on top of Error to provide easy error messaging within the
+   * context of mongoose and express middleware.
+   *
+   * @argument message - `String` Your message to the API consumer
+   * @argument statusCode - `Number` Error code to display
+   * @class AppError
+   * @extends {Error}
+   */
   constructor(message, statusCode) {
     // calling the parent class which already has a message
     super(message);

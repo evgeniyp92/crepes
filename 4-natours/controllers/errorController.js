@@ -21,6 +21,12 @@ const handleValidationErrorDB = (error) => {
   return new AppError(message, 400);
 };
 
+const handleJWTError = () =>
+  new AppError('Invalid token. Please log in again', 401);
+
+const handleExpiredTokenError = () =>
+  new AppError('Invalid token. Please log in again', 401);
+
 // Error handlers
 const sendErrorForDev = (error, response) => {
   response.status(error.statusCode).json({
@@ -42,7 +48,7 @@ const sendErrorForProd = (error, response) => {
     console.log(`🤖 ERROR 🤖: ${error}`);
     response.status(500).json({
       status: 'error',
-      message: `Unknown error, probably caused by a dependancy.`,
+      message: `Unhandled error!`,
     });
   }
 };
@@ -66,7 +72,8 @@ module.exports = (error, request, response, next) => {
     if (err.name === 'CastError') err = handleCastErrorDB(err);
     if (err.code === 11000) err = handleDuplicateFieldsDB(err);
     if (err.name === 'ValidationError') err = handleValidationErrorDB(err);
-
+    if (err.name === 'JsonWebTokenError') err = handleJWTError();
+    if (err.name === 'TokenExpiredError') err = handleExpiredTokenError();
     sendErrorForProd(err, response);
   }
 };
