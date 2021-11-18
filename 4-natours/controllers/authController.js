@@ -16,7 +16,7 @@ exports.signUp = catchAsync(async (request, response, next) => {
     email: request.body.email,
     password: request.body.password,
     passwordConfirm: request.body.passwordConfirm,
-    passwordChangedAt: request.body.passwordChangedAt,
+    // passwordChangedAt: request.body.passwordChangedAt,
   };
 
   const newUser = await User.create(userToCreate);
@@ -95,3 +95,33 @@ exports.protect = catchAsync(async (request, response, next) => {
   request.user = currentUser;
   next();
 });
+
+// if the roles dont match up, throw an error
+// otherwise continue
+// eslint-disable-next-line arrow-body-style
+exports.restrictTo = (...roles) => {
+  return (request, response, next) => {
+    if (!roles.includes(request.user.role)) {
+      return next(new AppError('Insufficient rights', 403));
+    }
+
+    next();
+  };
+};
+
+exports.forgotPassword = catchAsync(async (request, response, next) => {
+  // 1) Get user based on POSTed email
+  const user = await User.findOne({ email: request.body.email });
+  if (!user) {
+    return next(new AppError('No user with that email address', 404));
+  }
+  // 2) Generate random reset token
+  const resetToken = user.createPasswordResetToken();
+  // we've updated the current document in our model but we still need to save it to db
+  // you have to turn off validators for this particular instance
+  await user.save({ validateBeforeSave: false });
+
+  // 3) Send it back as an email
+});
+
+exports.resetPassword = (request, response, next) => {};
