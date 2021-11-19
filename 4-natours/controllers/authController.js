@@ -21,6 +21,19 @@ const sendToken = (user, statusCode, res) => {
   });
 };
 
+// if the roles dont match up, throw an error
+// otherwise continue
+// eslint-disable-next-line arrow-body-style
+exports.restrictTo = (...roles) => {
+  return (request, response, next) => {
+    if (!roles.includes(request.user.role)) {
+      return next(new AppError('Insufficient rights', 403));
+    }
+
+    next();
+  };
+};
+
 exports.signUp = catchAsync(async (request, response, next) => {
   const userToCreate = {
     name: request.body.name,
@@ -103,19 +116,6 @@ exports.protect = catchAsync(async (request, response, next) => {
   request.user = currentUser;
   next();
 });
-
-// if the roles dont match up, throw an error
-// otherwise continue
-// eslint-disable-next-line arrow-body-style
-exports.restrictTo = (...roles) => {
-  return (request, response, next) => {
-    if (!roles.includes(request.user.role)) {
-      return next(new AppError('Insufficient rights', 403));
-    }
-
-    next();
-  };
-};
 
 exports.forgotPassword = catchAsync(async (request, response, next) => {
   // 1) Get user based on POSTed email
