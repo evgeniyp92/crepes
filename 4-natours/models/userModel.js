@@ -53,23 +53,25 @@ userSchema.pre('save', async function (next) {
   this.passwordConfirm = undefined;
 });
 
+userSchema.pre('save', function (next) {
+  // if password hasnt been modified or document is new dont do anything
+  if (!this.isModified('password') || this.isNew) return next();
+  // set the password changed at to 10s in the past to avoid race conditions with the JWT
+  this.passwordChangedAt = Date.now() - 10000;
+  next();
+});
+
 // eslint-disable-next-line func-names
 // check if the passwords match
-userSchema.methods.correctPassword = async function (
-  candidatePassword,
-  userPassword
-) {
+userSchema.methods.correctPassword = async function (candidatePassword, userPassword) {
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
 //
 userSchema.methods.changedPasswordAfter = function (JWTTimeStamp) {
   if (this.passwordChangedAt) {
-    const changedTimeStamp = parseInt(
-      this.passwordChangedAt.getTime() / 1000,
-      10
-    );
-    console.log(changedTimeStamp, JWTTimeStamp);
+    const changedTimeStamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+    // console.log(changedTimeStamp, JWTTimeStamp);
     return JWTTimeStamp < changedTimeStamp; // this will return true only if the password was changed after the token was issued
   }
   // false means not changed
@@ -79,10 +81,7 @@ userSchema.methods.changedPasswordAfter = function (JWTTimeStamp) {
 userSchema.methods.createPasswordResetToken = function () {
   const resetToken = crypto.randomBytes(32).toString('hex');
 
-  this.passwordResetToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex');
+  this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
   console.log({ resetToken });
   console.log(this.passwordResetToken);

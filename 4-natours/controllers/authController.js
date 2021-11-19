@@ -1,14 +1,25 @@
 const { promisify } = require('util');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const sendEmail = require('../utils/email');
 
 // helper function to sign a token
-const signToken = (id) =>
+const signToken = id =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
+
+// helper function to send a token
+const sendToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+  res.status(statusCode).json({
+    status: 'success',
+    token,
+  });
+};
 
 exports.signUp = catchAsync(async (request, response, next) => {
   const userToCreate = {
@@ -60,10 +71,7 @@ exports.protect = catchAsync(async (request, response, next) => {
   The standard for supplying JWTs is below
   Authorization: Bearer [token here] */
   let token;
-  if (
-    request.headers.authorization &&
-    request.headers.authorization.startsWith('Bearer')
-  ) {
+  if (request.headers.authorization && request.headers.authorization.startsWith('Bearer')) {
     token = request.headers.authorization.split(' ')[1];
   }
   if (!token) {
@@ -117,11 +125,84 @@ exports.forgotPassword = catchAsync(async (request, response, next) => {
   }
   // 2) Generate random reset token
   const resetToken = user.createPasswordResetToken();
+
   // we've updated the current document in our model but we still need to save it to db
   // you have to turn off validators for this particular instance
+  // otherwise validators run and fail the request, because of lacking fields
   await user.save({ validateBeforeSave: false });
 
   // 3) Send it back as an email
+  const resetURL = `${request.protocol}://${request.get(
+    'host'
+  )}/api/v1/users/reset-password/${resetToken}`;
+
+  const message = `Forgot your password? Submit a PATCH request with your new password and password confirm to ${resetURL}. \n If you didn't forget your password, please ignore this email.`;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: 'Your password reset token',
+      text: message,
+    });
+  } catch (err) {
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    return next(new AppError(`There was an error sending the email, try again later`, 500));
+  }
+
+  response.json({
+    status: 'success',
+    message: 'reset token issued',
+  });
 });
 
-exports.resetPassword = (request, response, next) => {};
+exports.resetPassword = catchAsync(async (request, response, next) => {
+  // 1) Get user based on token
+  const hashedToken = crypto.createHash('sha256').update(request.params.token).digest('hex');
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+  // 2) If token hasnt expired and user exists, set a new password
+  if (!user) {
+    return next(new AppError('The token has expired. Please try again.'));
+  }
+  user.password = request.body.password;
+  user.passwordConfirm = request.body.passwordConfirm;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  await user.save();
+  // 4) Log the user in and send a JWT
+  const token = signToken(user._id);
+  response.json({
+    status: 'success',
+    token,
+  });
+  // 3) Update passwordChangedAt
+});
+
+exports.updatePassword = catchAsync(async (request, response, next) => {
+  // 1) Get user from collection
+  const user = await User.findById(request.user._id).select('+password');
+  // 2) Check if the posted password is correct
+  if (!request.body.password || !request.body.passwordConfirm) {
+    const err = 'You must provide a new password and/or a password confirmation';
+    return next(new AppError(err, 400));
+  }
+  if (await user.correctPassword(request.body.password, user.password)) {
+    const err = 'Password cannot be same as old password';
+    return next(new AppError(err, 403));
+  }
+  // 3) If the password is correct, update password
+  if (!(request.body.password === request.body.passwordConfirm)) {
+    const err = 'Password and password confirmation does not match';
+    return next(new AppError(err, 403));
+  }
+  user.password = request.body.password;
+  user.passwordConfirm = request.body.passwordConfirm;
+  await user.save();
+  // 4) Log the user in with a reissued JWT
+  sendToken(user, 201, response);
+});
