@@ -4,6 +4,8 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
+// eslint-disable-next-line node/no-extraneous-require
+const hpp = require('hpp');
 
 const AppError = require('./utils/appError');
 const errorController = require('./controllers/errorController');
@@ -36,6 +38,20 @@ app.use(express.json({ limit: '10kb' }));
 // data sanitizing against NoSQL injection and xss
 app.use(mongoSanitize());
 app.use(xss());
+
+// preventing param pollution
+app.use(
+  hpp({
+    whitelist: [
+      'duration',
+      'ratingsQuantity',
+      'ratingsAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price',
+    ],
+  })
+);
 
 // serving static pages
 app.use(express.static(`${__dirname}/public`));
