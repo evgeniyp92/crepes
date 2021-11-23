@@ -1,18 +1,20 @@
 const { promisify } = require('util');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+
 const User = require('../models/userModel');
+
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const sendEmail = require('../utils/email');
 
-// helper function to sign a token
+/* ------------------- Helper function to sign a token ---------------------- */
 const signToken = id =>
   jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
-// helper function to send a token
+/* --------------------- Helper function to send a token -------------------- */
 const sendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
   res.status(statusCode).json({
@@ -21,6 +23,7 @@ const sendToken = (user, statusCode, res) => {
   });
 };
 
+/* --------------------------- restrictTo function -------------------------- */
 // if the roles dont match up, throw an error
 // otherwise continue
 // eslint-disable-next-line arrow-body-style
@@ -34,6 +37,7 @@ exports.restrictTo = (...roles) => {
   };
 };
 
+/* ------------------------------- USER SIGNUP ------------------------------ */
 exports.signUp = catchAsync(async (request, response, next) => {
   const userToCreate = {
     name: request.body.name,
@@ -54,6 +58,7 @@ exports.signUp = catchAsync(async (request, response, next) => {
   });
 });
 
+/* ---------------------------------- LOGIN --------------------------------- */
 exports.login = catchAsync(async (request, response, next) => {
   const { email, password } = request.body;
   // 1) Check if email and passwords exist in the request
@@ -77,6 +82,7 @@ exports.login = catchAsync(async (request, response, next) => {
   });
 });
 
+/* ---------------------------- PROTECT FUNCTION ---------------------------- */
 exports.protect = catchAsync(async (request, response, next) => {
   // Get the token and check if its there
   /** You can typically send a token as an http header, which can
@@ -84,17 +90,19 @@ exports.protect = catchAsync(async (request, response, next) => {
   The standard for supplying JWTs is below
   Authorization: Bearer [token here] */
   let token;
-  if (request.headers.authorization && request.headers.authorization.startsWith('Bearer')) {
+  if (
+    request.headers.authorization &&
+    request.headers.authorization.startsWith('Bearer')
+  ) {
     token = request.headers.authorization.split(' ')[1];
   }
   if (!token) {
     return next(new AppError('Not logged in', 401));
   }
 
-  // Validate and verify the token
-  // We are going to promisify this method
-  // If someone were to manipulate the token they would need to know the secret
-  // to get it to pass verification
+  // Validate and verify the token. We are going to promisify this method. If
+  // someone were to manipulate the token they would need to know the secret to
+  // get it to pass verification
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
   // If verified, check if user exists
@@ -117,6 +125,7 @@ exports.protect = catchAsync(async (request, response, next) => {
   next();
 });
 
+/* -------------------- FORGOT PASSWORD (UNAUTHENTICATED) ------------------- */
 exports.forgotPassword = catchAsync(async (request, response, next) => {
   // 1) Get user based on POSTed email
   const user = await User.findOne({ email: request.body.email });
@@ -126,8 +135,8 @@ exports.forgotPassword = catchAsync(async (request, response, next) => {
   // 2) Generate random reset token
   const resetToken = user.createPasswordResetToken();
 
-  // we've updated the current document in our model but we still need to save it to db
-  // you have to turn off validators for this particular instance
+  // we've updated the current document in our model but we still need to save
+  // it to db. You have to turn off validators for this particular instance
   // otherwise validators run and fail the request, because of lacking fields
   await user.save({ validateBeforeSave: false });
 
@@ -136,7 +145,7 @@ exports.forgotPassword = catchAsync(async (request, response, next) => {
     'host'
   )}/api/v1/users/reset-password/${resetToken}`;
 
-  const message = `Forgot your password? Submit a PATCH request with your new password and password confirm to ${resetURL}. \n If you didn't forget your password, please ignore this email.`;
+  const message = `Forgot your password? You fucker. Submit a PATCH request with your new password and password confirm to ${resetURL}. \n If you didn't forget your password, please ignore this email.`;
 
   try {
     await sendEmail({
@@ -149,7 +158,9 @@ exports.forgotPassword = catchAsync(async (request, response, next) => {
     user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
 
-    return next(new AppError(`There was an error sending the email, try again later`, 500));
+    return next(
+      new AppError(`There was an error sending the email, try again later`, 500)
+    );
   }
 
   response.json({
@@ -158,9 +169,13 @@ exports.forgotPassword = catchAsync(async (request, response, next) => {
   });
 });
 
+/* ------------- Reset password (AUTHENTICATED WITH EMAIL TOKEN) ------------ */
 exports.resetPassword = catchAsync(async (request, response, next) => {
   // 1) Get user based on token
-  const hashedToken = crypto.createHash('sha256').update(request.params.token).digest('hex');
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(request.params.token)
+    .digest('hex');
   const user = await User.findOne({
     passwordResetToken: hashedToken,
     passwordResetExpires: { $gt: Date.now() },
@@ -183,12 +198,14 @@ exports.resetPassword = catchAsync(async (request, response, next) => {
   // 3) Update passwordChangedAt
 });
 
+/* ----------------------- Update password (WITH JWT) ----------------------- */
 exports.updatePassword = catchAsync(async (request, response, next) => {
   // 1) Get user from collection
   const user = await User.findById(request.user._id).select('+password');
   // 2) Check if the posted password is correct
   if (!request.body.password || !request.body.passwordConfirm) {
-    const err = 'You must provide a new password and/or a password confirmation';
+    const err =
+      'Fucker. You must provide a new password and/or a password confirmation';
     return next(new AppError(err, 400));
   }
   if (await user.correctPassword(request.body.password, user.password)) {

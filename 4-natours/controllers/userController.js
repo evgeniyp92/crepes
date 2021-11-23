@@ -2,6 +2,7 @@ const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 
+/* ----------------------------- FILTER OBJECTS ----------------------------- */
 const filterObj = (obj, allowedFields) => {
   const newObject = {};
   Object.keys(obj).forEach(el => {
@@ -10,6 +11,7 @@ const filterObj = (obj, allowedFields) => {
   return newObject;
 };
 
+/* ------------------------------ GET ALL USERS ----------------------------- */
 exports.getAllUsers = catchAsync(async (request, response, next) => {
   const allUsers = await User.find();
 
@@ -20,6 +22,7 @@ exports.getAllUsers = catchAsync(async (request, response, next) => {
   });
 });
 
+/* ----------------------------- UPDATE OWN INFO ---------------------------- */
 exports.updateMe = catchAsync(async (request, response, next) => {
   if (Object.keys(request.body).length === 0) {
     const err = 'Please provide a body for the request';
@@ -31,17 +34,33 @@ exports.updateMe = catchAsync(async (request, response, next) => {
   }
   // filter out restricted fields
   const filteredBody = filterObj(request.body, ['name', 'email']);
-  // since we are not handling sensitive data here its fine to use findbyidandupdate
-  const updatedUser = await User.findByIdAndUpdate(request.user._id, filteredBody, {
-    new: true,
-    runValidators: true,
-  });
+  // since we are not handling sensitive data here its fine to use
+  // findbyidandupdate
+  const updatedUser = await User.findByIdAndUpdate(
+    request.user._id,
+    filteredBody,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
   response.json({
     status: 'success',
     data: updatedUser,
   });
 });
 
+/* --------------------------- DELETE OWN PROFILE --------------------------- */
+exports.deleteMe = catchAsync(async (request, response, next) => {
+  await User.findByIdAndUpdate(request.user.id, { active: false });
+
+  response.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
+
+/* ------------------------ CREATE USER (NOT SIGNUP) ------------------------ */
 exports.createUser = (request, response) => {
   response.status(500).json({
     status: 'error',
@@ -49,6 +68,7 @@ exports.createUser = (request, response) => {
   });
 };
 
+/* ---------------------------- GET USER DETAILS ---------------------------- */
 exports.getUser = (request, response) => {
   response.status(500).json({
     status: 'error',
@@ -56,6 +76,7 @@ exports.getUser = (request, response) => {
   });
 };
 
+/* ------------------------ UPDATE USER (NOT AS SELF) ----------------------- */
 exports.updateUser = (request, response) => {
   response.status(500).json({
     status: 'error',
@@ -63,6 +84,7 @@ exports.updateUser = (request, response) => {
   });
 };
 
+/* ------------------------------- DELETE USER ------------------------------ */
 exports.deleteUser = (request, response) => {
   response.status(500).json({
     status: 'error',
