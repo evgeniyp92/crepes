@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
 
 const AppError = require('./utils/appError');
 const errorController = require('./controllers/errorController');
@@ -14,6 +15,13 @@ const app = express();
 // MIDDLEWARES -- DECLARE ALL YOUR MIDDLEWARE HERE FOR GLOBAL MIDDLEWARE
 // logging via morgan
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
+// rate limiter
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'Stop hammering the api, fucker. Go away',
+});
+app.use('/api', limiter);
 // bodyparser
 app.use(express.json());
 // serving static pages
