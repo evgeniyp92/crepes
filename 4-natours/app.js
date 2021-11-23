@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 
 const AppError = require('./utils/appError');
 const errorController = require('./controllers/errorController');
@@ -13,8 +14,12 @@ const userRouter = require('./routes/userRoutes');
 const app = express();
 
 // MIDDLEWARES -- DECLARE ALL YOUR MIDDLEWARE HERE FOR GLOBAL MIDDLEWARE
+// helmet
+app.use(helmet());
+
 // logging via morgan
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
+
 // rate limiter
 const limiter = rateLimit({
   max: 100,
@@ -22,10 +27,13 @@ const limiter = rateLimit({
   message: 'Stop hammering the api, fucker. Go away',
 });
 app.use('/api', limiter);
+
 // bodyparser
-app.use(express.json());
+app.use(express.json({ limit: '10kb' }));
+
 // serving static pages
 app.use(express.static(`${__dirname}/public`));
+
 // append time to the request object
 app.use((req, res, next) => {
   // @ts-ignore
