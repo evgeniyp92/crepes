@@ -1,3 +1,4 @@
+/* eslint-disable func-names */
 const mongoose = require('mongoose');
 
 const reviewSchema = new mongoose.Schema(
@@ -31,6 +32,21 @@ const reviewSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+reviewSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'tour',
+    select: 'name',
+  });
+  next();
+});
+
+reviewSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'user',
+  });
+  next();
+});
 
 const Review = mongoose.model('Review', reviewSchema);
 

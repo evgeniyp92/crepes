@@ -13,6 +13,7 @@ const errorController = require('./controllers/errorController');
 // Importing routers
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 
 // Initializing application
 const app = express();
@@ -67,6 +68,7 @@ app.use((req, res, next) => {
 // Mounting routers -- YES THIS IS ALSO MIDDLEWARE
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 // Controlling for a route that isnt handled by any router listed above
 app.all('*', (request, response, next) => {
