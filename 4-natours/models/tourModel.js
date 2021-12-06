@@ -2,6 +2,8 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 
+const User = require('./userModel');
+
 const tourSchema = new mongoose.Schema(
   {
     name: {
@@ -106,6 +108,7 @@ const tourSchema = new mongoose.Schema(
         day: Number,
       },
     ],
+    guides: Array,
   },
   {
     toJSON: { virtuals: true },
@@ -119,8 +122,16 @@ tourSchema.virtual('durationWeeks').get(function () {
 
 // DOCUMENT MIDDLEWARE runs before the save command and the create command (not
 // on insertMany or update)
+/* ---------------------------- Slugify the name ---------------------------- */
 tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
+  next();
+});
+
+/* ---------- Populate the guides and embed them into the document ---------- */
+tourSchema.pre('save', async function (next) {
+  const guidesPromises = this.guides.map(guideId => User.findById(guideId));
+  this.guides = await Promise.all(guidesPromises);
   next();
 });
 

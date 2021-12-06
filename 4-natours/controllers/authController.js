@@ -41,6 +41,7 @@ const sendToken = (user, statusCode, res) => {
 };
 
 /* --------------------------- restrictTo function -------------------------- */
+
 // if the roles dont match up, throw an error
 // otherwise continue
 // eslint-disable-next-line arrow-body-style
