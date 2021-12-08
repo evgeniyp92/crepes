@@ -38,7 +38,7 @@ exports.getAllTours = catchAsync(async (request, response, next) => {
 });
 
 exports.getTour = catchAsync(async (request, response, next) => {
-  const tour = await Tour.findById(request.params.id);
+  const tour = await Tour.findById(request.params.id).populate('reviews');
 
   if (!tour) {
     return next(new AppError('Requested tour does not exist', 404));
@@ -46,7 +46,6 @@ exports.getTour = catchAsync(async (request, response, next) => {
 
   response.json({
     status: 'success',
-    params: request.params,
     data: {
       tour,
     },

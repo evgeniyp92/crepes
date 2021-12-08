@@ -123,6 +123,12 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
+tourSchema.virtual('reviews', {
+  ref: 'Review', // identifying the model to reference
+  foreignField: 'tour', // the foreign reference where to go looking
+  localField: '_id', // what to go looking for in the other model
+});
+
 // DOCUMENT MIDDLEWARE runs before the save command and the create command (not
 // on insertMany or update)
 /* ---------------------------- Slugify the name ---------------------------- */
