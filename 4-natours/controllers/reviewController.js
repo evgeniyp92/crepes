@@ -3,6 +3,9 @@ const catchAsync = require('../utils/catchAsync');
 
 /* ---------------------------- Create new review --------------------------- */
 exports.createReview = catchAsync(async (request, response, next) => {
+  // Allow nested routes by defining these args when they're not there
+  if (!request.body.tour) request.body.tour = request.params.tourId;
+  if (!request.body.user) request.body.user = request.user.id; // the user object comes from protect
   const newReview = await Review.create(request.body);
 
   response.status(201).json({
