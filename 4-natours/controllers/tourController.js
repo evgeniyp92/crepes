@@ -1,6 +1,4 @@
 const Tour = require('../models/tourModel');
-const APIFeatures = require('../utils/apiFeatures');
-const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 
@@ -12,39 +10,10 @@ exports.aliasTopTours = (request, response, next) => {
 };
 
 exports.createTour = factory.createOne(Tour);
+exports.getAllTours = factory.getAll(Tour);
+exports.getOneTour = factory.getOne(Tour, { path: 'reviews' });
 exports.updateTour = factory.updateOne(Tour);
 exports.deleteTour = factory.deleteOne(Tour);
-
-exports.getAllTours = catchAsync(async (request, response, next) => {
-  const features = new APIFeatures(Tour.find(), request.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-
-  const allTours = await features.query;
-
-  response.json({
-    status: 'success',
-    results: allTours.length,
-    data: { ...allTours },
-  });
-});
-
-exports.getTour = catchAsync(async (request, response, next) => {
-  const tour = await Tour.findById(request.params.id).populate('reviews');
-
-  if (!tour) {
-    return next(new AppError('Requested tour does not exist', 404));
-  }
-
-  response.json({
-    status: 'success',
-    data: {
-      tour,
-    },
-  });
-});
 
 exports.getTourStats = catchAsync(async (request, response, next) => {
   const stats = await Tour.aggregate([

@@ -12,16 +12,10 @@ const filterObj = (obj, allowedFields) => {
   return newObject;
 };
 
-/* ------------------------------ GET ALL USERS ----------------------------- */
-exports.getAllUsers = catchAsync(async (request, response, next) => {
-  const allUsers = await User.find();
-
-  response.json({
-    status: 'success',
-    results: allUsers.length,
-    data: { ...allUsers },
-  });
-});
+exports.getAllUsers = factory.getAll(User);
+exports.getUser = factory.getOne(User);
+exports.updateUser = factory.updateOne(User); // DO NOT UPDATE PASSWORDS WITH THIS
+exports.deleteUser = factory.deleteOne(User);
 
 /* ----------------------------- UPDATE OWN INFO ---------------------------- */
 exports.updateMe = catchAsync(async (request, response, next) => {
@@ -65,18 +59,6 @@ exports.deleteMe = catchAsync(async (request, response, next) => {
 exports.createUser = (request, response) => {
   response.status(500).json({
     status: 'error',
-    reason: 'endpoint not yet implemented',
+    reason: 'Endpoint is a stub, please use /signup',
   });
 };
-
-/* ---------------------------- GET USER DETAILS ---------------------------- */
-exports.getUser = (request, response) => {
-  response.status(500).json({
-    status: 'error',
-    reason: 'endpoint not yet implemented',
-  });
-};
-
-// DO NOT UPDATE PASSWORDS WITH THIS
-exports.updateUser = factory.updateOne(User);
-exports.deleteUser = factory.deleteOne(User);

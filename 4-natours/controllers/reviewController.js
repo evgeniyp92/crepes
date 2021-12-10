@@ -1,5 +1,4 @@
 const Review = require('../models/reviewModel');
-const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 
 exports.setTourUserIds = (request, response, next) => {
@@ -10,20 +9,7 @@ exports.setTourUserIds = (request, response, next) => {
 };
 
 exports.createReview = factory.createOne(Review);
+exports.getReview = factory.getOne(Review);
+exports.getAllReviews = factory.getAll(Review);
 exports.deleteReview = factory.deleteOne(Review);
 exports.updateReview = factory.updateOne(Review);
-
-/* ----------------------------- Get all reviews ---------------------------- */
-exports.getAllReviews = catchAsync(async (request, response, next) => {
-  // if a tourId param exists, set the filter to respond with just the reviews
-  // of that tour
-  let filter = {};
-  if (request.params.tourId) filter = { tour: request.params.tourId };
-
-  const allReviews = await Review.find(filter);
-
-  response.json({
-    status: 'success',
-    reviews: allReviews,
-  });
-});

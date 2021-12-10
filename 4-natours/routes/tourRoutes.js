@@ -13,7 +13,6 @@ router
   .get(tourController.aliasTopTours, tourController.getAllTours);
 
 router.route('/tour-stats').get(tourController.getTourStats);
-
 router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
 
 router
@@ -22,7 +21,7 @@ router
   .post(tourController.createTour);
 router
   .route('/:id')
-  .get(tourController.getTour)
+  .get(tourController.getOneTour)
   .patch(tourController.updateTour)
   .delete(
     authController.protect,
