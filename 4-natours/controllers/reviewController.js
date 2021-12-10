@@ -18,7 +18,12 @@ exports.createReview = catchAsync(async (request, response, next) => {
 
 /* ----------------------------- Get all reviews ---------------------------- */
 exports.getAllReviews = catchAsync(async (request, response, next) => {
-  const allReviews = await Review.find();
+  // if a tourId param exists, set the filter to respond with just the reviews
+  // of that tour
+  let filter = {};
+  if (request.params.tourId) filter = { tour: request.params.tourId };
+
+  const allReviews = await Review.find(filter);
 
   response.json({
     status: 'success',
