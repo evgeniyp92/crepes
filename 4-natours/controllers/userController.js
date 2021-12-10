@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
+const factory = require('./handlerFactory');
 
 /* ----------------------------- FILTER OBJECTS ----------------------------- */
 const filterObj = (obj, allowedFields) => {
@@ -85,9 +86,4 @@ exports.updateUser = (request, response) => {
 };
 
 /* ------------------------------- DELETE USER ------------------------------ */
-exports.deleteUser = (request, response) => {
-  response.status(500).json({
-    status: 'error',
-    reason: 'endpoint not yet implemented',
-  });
-};
+exports.deleteUser = factory.deleteOne(User);
