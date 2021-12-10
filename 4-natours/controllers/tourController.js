@@ -11,16 +11,9 @@ exports.aliasTopTours = (request, response, next) => {
   next();
 };
 
-exports.createTour = catchAsync(async (request, response, next) => {
-  const newTour = await Tour.create(request.body);
-
-  response.status(201).json({
-    status: 'success',
-    data: {
-      tour: newTour,
-    },
-  });
-});
+exports.createTour = factory.createOne(Tour);
+exports.updateTour = factory.updateOne(Tour);
+exports.deleteTour = factory.deleteOne(Tour);
 
 exports.getAllTours = catchAsync(async (request, response, next) => {
   const features = new APIFeatures(Tour.find(), request.query)
@@ -52,43 +45,6 @@ exports.getTour = catchAsync(async (request, response, next) => {
     },
   });
 });
-
-exports.updateTour = catchAsync(async (request, response, next) => {
-  const tour = await Tour.findByIdAndUpdate(request.params.id, request.body, {
-    // respond with the updated document
-    new: true,
-    // run the validators on the new object
-    runValidators: true,
-  });
-
-  if (!tour) {
-    return next(new AppError('Requested tour does not exist', 404));
-  }
-
-  response.json({
-    status: 'success',
-    params: request.params,
-    body: request.body,
-    data: {
-      tour,
-    },
-  });
-});
-
-// exports.deleteTour = catchAsync(async (request, response, next) => {
-//   const tour = await Tour.findByIdAndDelete(request.params.id);
-
-//   if (!tour) {
-//     return next(new AppError('Requested tour does not exist', 404));
-//   }
-
-//   response.status(204).json({
-//     status: 'success',
-//     data: null,
-//   });
-// });
-
-exports.deleteTour = factory.deleteOne(Tour);
 
 exports.getTourStats = catchAsync(async (request, response, next) => {
   const stats = await Tour.aggregate([

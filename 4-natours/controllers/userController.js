@@ -77,13 +77,6 @@ exports.getUser = (request, response) => {
   });
 };
 
-/* ------------------------ UPDATE USER (NOT AS SELF) ----------------------- */
-exports.updateUser = (request, response) => {
-  response.status(500).json({
-    status: 'error',
-    reason: 'endpoint not yet implemented',
-  });
-};
-
-/* ------------------------------- DELETE USER ------------------------------ */
+// DO NOT UPDATE PASSWORDS WITH THIS
+exports.updateUser = factory.updateOne(User);
 exports.deleteUser = factory.deleteOne(User);
