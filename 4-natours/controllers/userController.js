@@ -45,6 +45,12 @@ exports.updateMe = catchAsync(async (request, response, next) => {
   });
 });
 
+/* ----------------------- VIEW OWN INFO (MIDDLEWARE) ----------------------- */
+exports.getMe = (request, response, next) => {
+  request.params.id = request.user.id;
+  next();
+};
+
 /* --------------------------- DELETE OWN PROFILE --------------------------- */
 exports.deleteMe = catchAsync(async (request, response, next) => {
   await User.findByIdAndUpdate(request.user.id, { active: false });
