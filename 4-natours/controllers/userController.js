@@ -14,8 +14,17 @@ const filterObj = (obj, allowedFields) => {
 
 exports.getAllUsers = factory.getAll(User);
 exports.getUser = factory.getOne(User);
-exports.updateUser = factory.updateOne(User); // DO NOT UPDATE PASSWORDS WITH THIS
+// ⬇️ DO NOT UPDATE PASSWORDS WITH THIS
+exports.updateUser = factory.updateOne(User);
 exports.deleteUser = factory.deleteOne(User);
+
+/* ----------------------- VIEW OWN INFO (MIDDLEWARE) ----------------------- */
+exports.getMe = (request, response, next) => {
+  // getOne wants req.params.id and we have the id from the protect function
+  // so we simply set params.id to be equal to user.id
+  request.params.id = request.user.id;
+  next();
+};
 
 /* ----------------------------- UPDATE OWN INFO ---------------------------- */
 exports.updateMe = catchAsync(async (request, response, next) => {
@@ -44,12 +53,6 @@ exports.updateMe = catchAsync(async (request, response, next) => {
     data: updatedUser,
   });
 });
-
-/* ----------------------- VIEW OWN INFO (MIDDLEWARE) ----------------------- */
-exports.getMe = (request, response, next) => {
-  request.params.id = request.user.id;
-  next();
-};
 
 /* --------------------------- DELETE OWN PROFILE --------------------------- */
 exports.deleteMe = catchAsync(async (request, response, next) => {

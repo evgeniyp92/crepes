@@ -5,29 +5,20 @@ const authController = require('../controllers/authController');
 const router = express.Router();
 
 router.post('/signup', authController.signUp);
-
 router.post('/login', authController.login);
-
 router.post('/forgot-password', authController.forgotPassword);
-
 router.patch('/reset-password/:token', authController.resetPassword);
 
-router.patch(
-  '/update-password',
-  authController.protect,
-  authController.updatePassword
-);
+/* --------- ⬇️ All middleware after this call is blanket protected --------- */
+router.use(authController.protect);
 
-router.get(
-  '/me',
-  authController.protect,
-  userController.getMe,
-  userController.getUser
-);
+router.get('/me', userController.getMe, userController.getUser);
+router.patch('/update-data', userController.updateMe);
+router.patch('/update-password', authController.updatePassword);
+router.delete('/delete-me', userController.deleteMe);
 
-router.patch('/update-data', authController.protect, userController.updateMe);
-
-router.delete('/delete-me', authController.protect, userController.deleteMe);
+/* -------------------------- ⬇️ Admin only routes -------------------------- */
+router.use(authController.restrictTo('admin'));
 
 router
   .route('/')
