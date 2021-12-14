@@ -69,7 +69,7 @@ exports.getOne = (Model, popOptions) =>
     });
   });
 
-exports.getAll = (Model, popOptions) =>
+exports.getAll = Model =>
   catchAsync(async (request, response, next) => {
     // if a tourId param exists, set the filter to respond with just the reviews
     // of that tour
