@@ -2,29 +2,29 @@ const AppError = require('../utils/appError');
 
 /* eslint-disable no-param-reassign */
 // Error generators
-const handleCastErrorDB = (error) => {
+const handleCastErrorDB = error => {
   const message = `Invalid: ${error.path} is ${error.value}`;
   return new AppError(message, 400);
 };
 
-const handleDuplicateFieldsDB = (error) => {
+const handleDuplicateFieldsDB = error => {
   const duplicateFields = Object.keys(error.keyPattern).join(', ');
   const message = `Duplicate field values for the following: ${duplicateFields}. please use another value`;
   return new AppError(message, 400);
 };
 
-const handleValidationErrorDB = (error) => {
+const handleValidationErrorDB = error => {
   const invalidFields = Object.values(error.errors).map(
-    (element) => element.message
+    element => element.message
   );
   const message = `Invalid input data. ${invalidFields.join('. ')}.`;
   return new AppError(message, 400);
 };
 
-const handleJWTError = (error) =>
+const handleJWTError = error =>
   new AppError('Invalid token. Please log in again', 401);
 
-const handleExpiredTokenError = (error) =>
+const handleExpiredTokenError = error =>
   new AppError('Invalid token. Please log in again', 401);
 
 // Error handlers
