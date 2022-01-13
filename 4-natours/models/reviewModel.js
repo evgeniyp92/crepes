@@ -34,6 +34,8 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+
 // reviewSchema.pre(/^find/, function (next) {
 //   this.populate({
 //     path: 'tour',
@@ -59,7 +61,7 @@ reviewSchema.pre(/^find/, function (next) {
 
 reviewSchema.pre(/^findOneAnd/, async function (next) {
   // in this context the this keyword is the query not the document
-  // so we just run findOne
+  // so we just run findOne to get the relevant document
   this.r = await this.findOne();
   console.log(this.r);
   next();
@@ -95,10 +97,17 @@ reviewSchema.statics.calcAverageRatings = async function (tourID) {
   ]);
   console.log(stats);
 
-  await Tour.findByIdAndUpdate(tourID, {
-    ratingsQuantity: stats[0].nRating,
-    ratingsAverage: stats[0].avgRating,
-  });
+  if (stats.length > 0) {
+    await Tour.findByIdAndUpdate(tourID, {
+      ratingsQuantity: stats[0].nRating,
+      ratingsAverage: stats[0].avgRating,
+    });
+  } else {
+    await Tour.findByIdAndUpdate(tourID, {
+      ratingsQuantity: 0,
+      ratingsAverage: 4.5,
+    });
+  }
 };
 
 const Review = mongoose.model('Review', reviewSchema);
