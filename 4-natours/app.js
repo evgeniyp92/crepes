@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -17,6 +18,12 @@ const reviewRouter = require('./routes/reviewRoutes');
 
 // Initializing application
 const app = express();
+
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+
+// serving static pages
+app.use(express.static(`${__dirname}/public`));
 
 // MIDDLEWARES -- DECLARE ALL YOUR MIDDLEWARE HERE FOR GLOBAL MIDDLEWARE
 // helmet
@@ -54,9 +61,6 @@ app.use(
   })
 );
 
-// serving static pages
-app.use(express.static(`${__dirname}/public`));
-
 // append time to the request object
 app.use((req, res, next) => {
   // @ts-ignore
@@ -66,6 +70,10 @@ app.use((req, res, next) => {
 });
 
 // Mounting routers -- YES THIS IS ALSO MIDDLEWARE
+app.get('/', (req, res) => {
+  res.status(200).render('base');
+});
+
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
