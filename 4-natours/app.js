@@ -71,7 +71,10 @@ app.use((req, res, next) => {
 
 // Mounting routers -- YES THIS IS ALSO MIDDLEWARE
 app.get('/', (req, res) => {
-  res.status(200).render('base');
+  res.status(200).render('base', {
+    tour: 'The Forest Hiker',
+    user: 'eugene',
+  });
 });
 
 app.use('/api/v1/tours', tourRouter);
