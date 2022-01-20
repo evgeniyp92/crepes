@@ -11,22 +11,22 @@ const hpp = require('hpp');
 const AppError = require('./utils/appError');
 const errorController = require('./controllers/errorController');
 
-// Importing routers
+/* ---------------------------- Importing routers --------------------------- */
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const viewRouter = require('./routes/viewRoutes');
 
-// Initializing application
+/* ------------------------ Initializing application ------------------------ */
 const app = express();
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
-// serving static pages
+/* -------------------------- serving static pages -------------------------- */
 app.use(express.static(`${__dirname}/public`));
 
-// MIDDLEWARES -- DECLARE ALL YOUR MIDDLEWARE HERE FOR GLOBAL MIDDLEWARE
+/* -- MIDDLEWARES -- DECLARE ALL YOUR MIDDLEWARE HERE FOR GLOBAL MIDDLEWARE - */
 // helmet
 app.use(helmet());
 
