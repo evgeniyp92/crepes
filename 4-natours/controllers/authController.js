@@ -96,6 +96,14 @@ exports.login = catchAsync(async (request, response, next) => {
 
   // 3) If everything ok respond with JWT with user id included
   const token = signToken(user._id);
+
+  response.cookie('jwt', token, {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 60 * 1000
+    ),
+    httpOnly: true,
+  });
+
   response.json({
     status: 'success',
     token,
