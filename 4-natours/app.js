@@ -7,6 +7,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 // eslint-disable-next-line node/no-extraneous-require
 const hpp = require('hpp');
+const cookieParser = require('cookie-parser');
 
 const AppError = require('./utils/appError');
 const errorController = require('./controllers/errorController');
@@ -43,6 +44,7 @@ app.use('/api', limiter);
 
 // bodyparser
 app.use(express.json({ limit: '10kb' }));
+app.use(cookieParser());
 
 // data sanitizing against NoSQL injection and xss
 app.use(mongoSanitize());
@@ -66,7 +68,7 @@ app.use(
 app.use((req, res, next) => {
   // @ts-ignore
   req.currentTime = new Date().toISOString();
-  // console.log(req.headers);
+  console.log(req.cookies);
   next();
 });
 

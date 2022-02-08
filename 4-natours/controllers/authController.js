@@ -110,6 +110,31 @@ exports.login = catchAsync(async (request, response, next) => {
   });
 });
 
+/* --------------------------- ISLOGGEDIN FUNCTION -------------------------- */
+// Only for rendered pages, no error handling
+exports.isLoggedIn = catchAsync(async (request, response, next) => {
+  let token;
+  if (request.cookies.jwt) {
+    token = request.cookies.jwt;
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
+      return next();
+    }
+
+    if (currentUser.changedPasswordAfter(decoded.iat)) {
+      return next();
+    }
+
+    // if all the above passes the user is logged in, make the user accessible
+    // to the template
+    response.locals.user = currentUser;
+    return next();
+  }
+  next();
+});
+
 /* ---------------------------- PROTECT FUNCTION ---------------------------- */
 exports.protect = catchAsync(async (request, response, next) => {
   // Get the token and check if its there
@@ -123,7 +148,10 @@ exports.protect = catchAsync(async (request, response, next) => {
     request.headers.authorization.startsWith('Bearer')
   ) {
     token = request.headers.authorization.split(' ')[1];
+  } else if (request.cookies.jwt) {
+    token = request.cookies.jwt;
   }
+
   if (!token) {
     return next(new AppError('Not logged in', 401));
   }

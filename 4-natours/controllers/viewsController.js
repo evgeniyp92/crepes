@@ -38,7 +38,7 @@ exports.getLoginForm = (req, res) => {
     .status(200)
     .set(
       'Content-Security-Policy',
-      'connect-src https://*.tiles.mapbox.com https://api.mapbox.com https://events.mapbox.com https://cdnjs.cloudflare.com http://127.0.0.1:4000'
+      'connect-src https://*.tiles.mapbox.com https://api.mapbox.com https://events.mapbox.com https://cdnjs.cloudflare.com http://localhost:4000'
     )
     .render('login', {
       title: 'Login',
