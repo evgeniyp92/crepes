@@ -7,10 +7,16 @@ exports.getOverview = catchAsync(async (req, res, next) => {
   // 2. Build the template
   // 3. Render the template using the tour data from step 1
 
-  res.status(200).render('overview', {
-    title: 'All Tours',
-    allTours,
-  });
+  res
+    .status(200)
+    .set(
+      'Content-Security-Policy',
+      'connect-src https://*.tiles.mapbox.com https://api.mapbox.com https://events.mapbox.com ws://localhost:*'
+    )
+    .render('overview', {
+      title: 'All Tours',
+      allTours,
+    });
 });
 
 exports.getTour = catchAsync(async (req, res, next) => {
@@ -25,7 +31,7 @@ exports.getTour = catchAsync(async (req, res, next) => {
     .status(200)
     .set(
       'Content-Security-Policy',
-      'connect-src https://*.tiles.mapbox.com https://api.mapbox.com https://events.mapbox.com'
+      'connect-src https://*.tiles.mapbox.com https://api.mapbox.com https://events.mapbox.com ws://localhost:*'
     )
     .render('tour', {
       title: tour.name,
@@ -38,7 +44,7 @@ exports.getLoginForm = (req, res) => {
     .status(200)
     .set(
       'Content-Security-Policy',
-      'connect-src https://*.tiles.mapbox.com https://api.mapbox.com https://events.mapbox.com https://cdnjs.cloudflare.com http://localhost:4000'
+      'connect-src https://*.tiles.mapbox.com https://api.mapbox.com https://events.mapbox.com https://cdnjs.cloudflare.com http://localhost:4000 ws://localhost:*'
     )
     .render('login', {
       title: 'Login',
