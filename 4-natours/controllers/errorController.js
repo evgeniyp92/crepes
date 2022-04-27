@@ -46,18 +46,29 @@ const sendErrorForDev = (error, request, response) => {
   }
 };
 
-const sendErrorForProd = (error, response) => {
-  if (error.isOperational) {
-    response.status(error.statusCode).json({
-      status: error.status,
-      message: error.message,
-    });
-  } else {
+const sendErrorForProd = (error, request, response) => {
+  if (request.originalUrl.startsWith('/api')) {
+    if (error.isOperational) {
+      return response.status(error.statusCode).json({
+        status: error.status,
+        message: error.message,
+      });
+    }
     // eslint-disable-next-line no-console
     console.log(`🤖 ERROR 🤖: ${error}`);
     response.status(500).json({
       status: 'error',
       message: `Unhandled error!`,
+    });
+  } else if (error.isOperational) {
+    return response.status(error.statusCode).json({
+      status: error.status,
+      message: error.message,
+    });
+  } else {
+    return response.status(500).json({
+      status: 'error',
+      message: 'Something went wrong!',
     });
   }
 };

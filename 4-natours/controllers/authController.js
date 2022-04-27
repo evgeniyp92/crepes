@@ -195,6 +195,7 @@ exports.protect = catchAsync(async (request, response, next) => {
 
   // The JWT and request has passed all checks, give access
   request.user = currentUser;
+  response.locals.user = currentUser;
   next();
 });
 
