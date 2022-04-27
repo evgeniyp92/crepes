@@ -1,5 +1,6 @@
 const Tour = require('../models/tourModel');
 const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
 exports.getOverview = catchAsync(async (req, res, next) => {
   // 1. Get all tour data from collection
@@ -11,7 +12,7 @@ exports.getOverview = catchAsync(async (req, res, next) => {
     .status(200)
     .set(
       'Content-Security-Policy',
-      'connect-src https://*.tiles.mapbox.com https://api.mapbox.com https://events.mapbox.com ws://localhost:*'
+      'connect-src https://*.tiles.mapbox.com https://api.mapbox.com https://events.mapbox.com ws://localhost:* http://localhost:4000/'
     )
     .render('overview', {
       title: 'All Tours',
@@ -25,13 +26,17 @@ exports.getTour = catchAsync(async (req, res, next) => {
     fields: 'review rating user',
   });
 
+  if (!tour) {
+    return next(new AppError('There is no tour with that name.', 404));
+  }
+
   console.log(tour);
 
   res
     .status(200)
     .set(
       'Content-Security-Policy',
-      'connect-src https://*.tiles.mapbox.com https://api.mapbox.com https://events.mapbox.com ws://localhost:*'
+      'connect-src https://*.tiles.mapbox.com https://api.mapbox.com https://events.mapbox.com http://localhost:4000/ ws://localhost:*'
     )
     .render('tour', {
       title: tour.name,

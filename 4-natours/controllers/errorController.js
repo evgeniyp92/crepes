@@ -28,13 +28,22 @@ const handleExpiredTokenError = error =>
   new AppError('Invalid token. Please log in again', 401);
 
 // Error handlers
-const sendErrorForDev = (error, response) => {
-  response.status(error.statusCode).json({
-    status: error.status,
-    message: error.message,
-    stack: error.stack,
-    error: { ...error, name: error.name },
-  });
+const sendErrorForDev = (error, request, response) => {
+  // API
+  if (request.originalUrl.startsWith('/api')) {
+    response.status(error.statusCode).json({
+      status: error.status,
+      message: error.message,
+      stack: error.stack,
+      error: { ...error, name: error.name },
+    });
+  } else {
+    // RENDER
+    response.status(error.statusCode).render('error', {
+      title: 'Something went wrong!',
+      msg: error.message,
+    });
+  }
 };
 
 const sendErrorForProd = (error, response) => {
@@ -58,11 +67,11 @@ module.exports = (error, request, response, next) => {
   error.statusCode = error.statusCode || 500;
   error.status =
     error.status ||
-    'Unhandled error 😬, you should not be able to see this if you are in prod';
+    'Unhandled error, you should not be able to see this if you are in prod';
 
   if (process.env.NODE_ENV === 'development') {
     // sending error in development
-    sendErrorForDev(error, response);
+    sendErrorForDev(error, request, response);
   } else if (process.env.NODE_ENV === 'production') {
     // sending errors in production
 
@@ -74,6 +83,6 @@ module.exports = (error, request, response, next) => {
     if (err.name === 'ValidationError') err = handleValidationErrorDB(err);
     if (err.name === 'JsonWebTokenError') err = handleJWTError(err);
     if (err.name === 'TokenExpiredError') err = handleExpiredTokenError(err);
-    sendErrorForProd(err, response);
+    sendErrorForProd(error, request, response);
   }
 };

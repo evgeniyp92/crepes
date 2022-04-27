@@ -112,28 +112,45 @@ exports.login = catchAsync(async (request, response, next) => {
 
 /* --------------------------- ISLOGGEDIN FUNCTION -------------------------- */
 // Only for rendered pages, no error handling
-exports.isLoggedIn = catchAsync(async (request, response, next) => {
+exports.isLoggedIn = async (request, response, next) => {
   let token;
   if (request.cookies.jwt) {
-    token = request.cookies.jwt;
-    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    try {
+      token = request.cookies.jwt;
+      const decoded = await promisify(jwt.verify)(
+        token,
+        process.env.JWT_SECRET
+      );
 
-    const currentUser = await User.findById(decoded.id);
-    if (!currentUser) {
+      const currentUser = await User.findById(decoded.id);
+      if (!currentUser) {
+        return next();
+      }
+
+      if (currentUser.changedPasswordAfter(decoded.iat)) {
+        return next();
+      }
+
+      // if all the above passes the user is logged in, make the user accessible
+      // to the template
+      response.locals.user = currentUser;
+      return next();
+    } catch (error) {
       return next();
     }
-
-    if (currentUser.changedPasswordAfter(decoded.iat)) {
-      return next();
-    }
-
-    // if all the above passes the user is logged in, make the user accessible
-    // to the template
-    response.locals.user = currentUser;
-    return next();
   }
   next();
-});
+};
+
+/* --------------------------------- LOGOUT --------------------------------- */
+exports.logout = (req, res) => {
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+
+  res.status(200).json({ status: 'success' });
+};
 
 /* ---------------------------- PROTECT FUNCTION ---------------------------- */
 exports.protect = catchAsync(async (request, response, next) => {
